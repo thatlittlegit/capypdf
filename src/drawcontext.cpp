@@ -949,7 +949,7 @@ rvoe<NoReturnValue> PdfDrawContext::render_text(const PdfText &textobj) {
     ERCV(indent(DrawStateType::Text));
     std::back_insert_iterator<std::string> app = std::back_inserter(serialisation);
     int32_t current_subset{-1};
-    CapyPDF_FontId current_font{-1};
+    std::optional<CapyPDF_FontId> current_font;
     double current_pointsize{-1};
 
     auto visitor = overloaded{
@@ -983,15 +983,17 @@ rvoe<NoReturnValue> PdfDrawContext::render_text(const PdfText &textobj) {
 
         [&](const Text_arg &tj) -> rvoe<NoReturnValue> {
             TextEvents charseq;
-            ERCV(utf8_to_kerned_chars(tj.text, charseq, current_font));
+	    if (!current_font.has_value()) RETERR(NoFontSelected);
+            ERCV(utf8_to_kerned_chars(tj.text, charseq, *current_font));
             ERCV(serialize_charsequence(
-                charseq, serialisation, current_font, current_subset, current_pointsize));
+                charseq, serialisation, *current_font, current_subset, current_pointsize));
             RETOK;
         },
 
         [&](const TJ_arg &tJ) -> rvoe<NoReturnValue> {
+	    if (!current_font.has_value()) RETERR(NoFontSelected);
             ERCV((serialize_charsequence(
-                tJ.elements, serialisation, current_font, current_subset, current_pointsize)));
+                tJ.elements, serialisation, *current_font, current_subset, current_pointsize)));
             RETOK;
         },
 

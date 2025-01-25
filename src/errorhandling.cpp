@@ -54,6 +54,7 @@ const std::array<const char *, (std::size_t)ErrorCode::NumErrors> error_texts{
 "Input image color profile could not be determined.",
 "Output intent identifier missing.",
 "Draw state end mismatch.",
+"No font was selected with the Tf command.",
 
 "OCG not used on this page.",
 "Unsupported TIFF image.",

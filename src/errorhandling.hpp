@@ -52,6 +52,7 @@ enum class ErrorCode : int32_t {
     InputProfileUnknown,
     MissingIntentIdentifier,
     DrawStateEndMismatch,
+    NoFontSelected,
 
     UnusedOcg,
     UnsupportedTIFF,
