@@ -876,7 +876,10 @@ rvoe<NoReturnValue> PdfDrawContext::serialize_charsequence(const TextEvents &cha
             appender_lambda(current_subset_glyph);
         } else if(auto actualtext = std::get_if<ActualTextStart>(&e)) {
             auto u16 = utf8_to_pdfutf16be(actualtext->text);
-            std::format_to(app, "] TJ\n{}/Span << /ActualText {} >> BDC\n{}[", ind, u16, ind);
+            if(!is_first) {
+	        serialisation += "] TJ\n";
+            }
+            std::format_to(app, "{}/Span << /ActualText {} >> BDC\n{}[", ind, u16, ind);
         } else if(std::holds_alternative<ActualTextEnd>(e)) {
             std::format_to(app, "] TJ\n{}EMC\n{}[", ind, ind);
         } else if(auto glyphitem = std::get_if<GlyphItem>(&e)) {
