@@ -387,11 +387,6 @@ rvoe<NoReturnValue> PdfDocument::add_page(std::string resource_dict,
             RETERR(AnnotationReuse);
         }
     }
-    for(const auto &s : structs) {
-        if(structure_use.find(s) != structure_use.cend()) {
-            RETERR(StructureReuse);
-        }
-    }
     const auto resource_num = add_object(FullPDFObject{std::move(resource_dict), {}});
     int32_t commands_num{-1};
     if(docprops.compress_streams) {
@@ -426,9 +421,8 @@ rvoe<NoReturnValue> PdfDocument::add_page(std::string resource_dict,
     for(const auto &a : annots) {
         annotation_use[a] = page_object_num;
     }
-    int32_t mcid_num = 0;
     for(const auto &s : structs) {
-        structure_use[s] = StructureUsage{(int32_t)pages.size(), mcid_num++};
+        structure_use.push_back(StructureUsage((int32_t)pages.size(), s));
     }
     pages.emplace_back(PageOffsets{resource_num, commands_num, page_object_num});
     RETOK;

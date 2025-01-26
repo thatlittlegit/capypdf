@@ -317,7 +317,7 @@ struct StructItem {
 
 struct StructureUsage {
     int32_t page_num;
-    int32_t mcid_num;
+    CapyPDF_StructureItemId sid;
 };
 
 typedef std::variant<DummyIndexZero,
@@ -551,7 +551,7 @@ private:
     // A form widget can be used on one and only one page.
     std::unordered_map<CapyPDF_FormWidgetId, int32_t> form_use;
     std::unordered_map<CapyPDF_AnnotationId, int32_t> annotation_use;
-    std::unordered_map<CapyPDF_StructureItemId, StructureUsage> structure_use;
+    std::vector<StructureUsage> structure_use;
     std::vector<std::vector<CapyPDF_StructureItemId>>
         structure_parent_tree_items; // FIXME should be a variant of some sort?
     std::optional<CapyPDF_IccColorSpaceId> output_profile;

@@ -1262,11 +1262,6 @@ rvoe<NoReturnValue> PdfDrawContext::set_group_matrix(const PdfMatrix &mat) {
 }
 
 rvoe<int32_t> PdfDrawContext::add_bcd_structure(CapyPDF_StructureItemId sid) {
-    for(const auto &id : used_structures) {
-        if(id == sid) {
-            RETERR(StructureReuse);
-        }
-    }
     used_structures.push_back(sid);
     return (int32_t)used_structures.size() - 1;
 }

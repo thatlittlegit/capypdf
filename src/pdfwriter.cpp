@@ -790,7 +790,8 @@ rvoe<NoReturnValue> PdfWriter::write_annotation(int obj_num, const DelayedAnnota
 
 rvoe<NoReturnValue> PdfWriter::write_delayed_structure_item(int obj_num,
                                                             const DelayedStructItem &dsi) {
-    std::vector<CapyPDF_StructureItemId> children;
+    std::unordered_set<CapyPDF_StructureItemId> children;
+    int32_t page_num = -1;
     const auto &si = doc.structure_items.at(dsi.sid.id);
     assert(doc.structure_root_object);
     int32_t parent_object = *doc.structure_root_object;
@@ -803,7 +804,7 @@ rvoe<NoReturnValue> PdfWriter::write_delayed_structure_item(int obj_num,
         if(doc.structure_items[i].parent) {
             auto current_parent = doc.structure_items.at(doc.structure_items[i].parent->id).obj_id;
             if(current_parent == si.obj_id) {
-                children.emplace_back(CapyPDF_StructureItemId{i});
+                children.emplace(CapyPDF_StructureItemId{i});
             }
         }
     }
@@ -823,24 +824,26 @@ rvoe<NoReturnValue> PdfWriter::write_delayed_structure_item(int obj_num,
     fmt.add_token("/P");
     fmt.add_object_ref(parent_object);
 
-    if(!children.empty()) {
-        fmt.add_token("/K");
-        fmt.begin_array(1);
+    fmt.add_token("/K");
+    fmt.begin_array(1);
+    for(int i = 0; i < (int32_t)doc.structure_use.size(); ++i) {
+        CapyPDF_StructureItemId sid = doc.structure_use[i].sid;
 
-        for(const auto &c : children) {
-            fmt.add_object_ref(doc.structure_items.at(c.id).obj_id);
+        if (page_num < 0) {
+            page_num = doc.structure_use[i].page_num;
         }
-        fmt.end_array();
-    } else {
-        // FIXME. Maybe not correct? Assumes that a struct item
-        // either has children or is used on a page. Not both.
-        const auto it = doc.structure_use.find(dsi.sid);
-        if(it != doc.structure_use.end()) {
-            const auto &[page_num, mcid_num] = it->second;
-            fmt.add_token("/Pg");
-            fmt.add_object_ref(doc.pages.at(page_num).page_obj_num);
-            fmt.add_token_pair("/K", mcid_num);
+
+        if (sid == dsi.sid) {
+            fmt.add_token(i);
+        } else if (children.contains(sid)) {
+            fmt.add_object_ref(doc.structure_items.at(sid.id).obj_id);
         }
+    }
+    fmt.end_array();
+
+    if (page_num >= 0) {
+        fmt.add_token("/Pg");
+        fmt.add_object_ref(doc.pages.at(page_num).page_obj_num);
     }
 
     // Extra elements.
