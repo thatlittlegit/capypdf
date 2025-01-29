@@ -837,6 +837,7 @@ rvoe<NoReturnValue> PdfWriter::write_delayed_structure_item(int obj_num,
             fmt.add_token(i);
         } else if (children.contains(sid)) {
             fmt.add_object_ref(doc.structure_items.at(sid.id).obj_id);
+            children.erase(sid);
         }
     }
     fmt.end_array();
