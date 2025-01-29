@@ -1003,7 +1003,8 @@ void PdfDocument::create_structure_root_dict() {
     fmt.begin_array();
     fmt.add_object_ref(structure_items[rootobj->id].obj_id);
     fmt.end_array();
-    fmt.add_token_pair("/ParentTree", structure_parent_tree_object.value());
+    fmt.add_token("/ParentTree");
+    fmt.add_object_ref(structure_parent_tree_object.value());
     fmt.add_token_pair("/ParentTreeNextKey", structure_parent_tree_items.size());
     if(!rolemap.empty()) {
         fmt.add_token("/RoleMap");
