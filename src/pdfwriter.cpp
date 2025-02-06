@@ -835,9 +835,16 @@ rvoe<NoReturnValue> PdfWriter::write_delayed_structure_item(int obj_num,
 
         if (sid == dsi.sid) {
             fmt.add_token(i);
-        } else if (children.contains(sid)) {
-            fmt.add_object_ref(doc.structure_items.at(sid.id).obj_id);
-            children.erase(sid);
+        } else {
+            std::optional<CapyPDF_StructureItemId> item = sid;
+            while(item.has_value()) {
+                if(children.contains(*item)) {
+                    fmt.add_object_ref(doc.structure_items.at(item->id).obj_id);
+                    children.erase(*item);
+                    break;
+                }
+                item = doc.structure_items.at(item->id).parent;
+            }
         }
     }
     fmt.end_array();
